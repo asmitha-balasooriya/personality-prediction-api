@@ -160,11 +160,15 @@ curl -X POST "https://YOUR-APP-NAME.onrender.com/predict" \
 ├── personality_model.ipynb       # 15-section training and analysis notebook
 ├── main.py                       # FastAPI application
 ├── requirements.txt              # Python dependencies
+├── runtime.txt                   # Python version
 ├── Procfile                      # Render process declaration
 ├── README.md
 └── model/
     ├── personality_model.joblib  # Serialised sklearn Pipeline (preprocessor + XGBoost)
     └── model_meta.json           # Model name, metrics, feature list, target map
+└── static/
+    └── index.html                # Interactive Web UI html code
+    
 ```
 
 ---
