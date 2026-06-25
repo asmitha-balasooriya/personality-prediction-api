@@ -7,12 +7,21 @@
 
 > **Base URL:** `https://personality-prediction-api-p6av.onrender.com`
 
-| Endpoint | Description |
-|----------|-------------|
-| [`GET /`](https://personality-prediction-api-p6av.onrender.com/) | API info and model summary |
-| [`GET /health`](https://personality-prediction-api-p6av.onrender.com/health) | Health check with live model metrics |
-| [`POST /predict`](https://personality-prediction-api-p6av.onrender.com/predict) | Personality prediction |
-| [`GET /docs`](https://personality-prediction-api-p6av.onrender.com/docs) | Interactive Swagger UI — try it live |
+### Available Interfaces
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| [`/` (Homepage)](https://personality-prediction-api-p6av.onrender.com/) | GET | **Interactive Web UI** – User-friendly form with sliders and toggles to enter values and get instant prediction |
+| [`/docs`](https://personality-prediction-api-p6av.onrender.com/docs) | GET | **Interactive Swagger UI** – Best for testing JSON API requests (recommended for developers) |
+| [`/health`](https://personality-prediction-api-p6av.onrender.com/health) | GET | Health check with live model metrics |
+| [`/predict`](https://personality-prediction-api-p6av.onrender.com/predict) | **POST** | Main prediction endpoint (accepts JSON payload) |
+
+---
+
+**How to Test:**
+- Use the **Homepage** (`/`) for a friendly experience.
+- Use **`/docs`** to test the JSON API directly with Swagger.
+
 
 ---
 
