@@ -1,0 +1,34 @@
+{
+  "model_name": "XGBoost (Tuned)",
+  "accuracy": 0.9145,
+  "roc_auc": 0.9547,
+  "f1_macro": 0.9136,
+  "mcc": 0.8284,
+  "cv_acc_mean": 0.9303,
+  "cv_acc_std": 0.0158,
+  "features": [
+    "Time_spent_Alone",
+    "Social_event_attendance",
+    "Going_outside",
+    "Friends_circle_size",
+    "Post_frequency",
+    "Stage_fear",
+    "Drained_after_socializing"
+  ],
+  "numeric_features": [
+    "Time_spent_Alone",
+    "Social_event_attendance",
+    "Going_outside",
+    "Friends_circle_size",
+    "Post_frequency"
+  ],
+  "categorical_features": [
+    "Stage_fear",
+    "Drained_after_socializing"
+  ],
+  "target_map": {
+    "0": "Extrovert",
+    "1": "Introvert"
+  },
+  "sklearn_version": "1.7.1"
+}
