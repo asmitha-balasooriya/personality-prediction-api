@@ -6,7 +6,8 @@ FastAPI · scikit-learn · joblib
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field, validator
+from fastapi.responses import HTMLResponse
+from pydantic import BaseModel, Field
 from typing import Literal
 import numpy as np
 import pandas as pd
@@ -18,11 +19,15 @@ import os
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "model", "personality_model.joblib")
 META_PATH  = os.path.join(BASE_DIR, "model", "model_meta.json")
+UI_PATH    = os.path.join(BASE_DIR, "static", "index.html")
 
 pipeline = joblib.load(MODEL_PATH)
 
 with open(META_PATH) as f:
     meta = json.load(f)
+
+with open(UI_PATH) as f:
+    UI_HTML = f.read()
 
 FEATURES = meta["features"]
 
@@ -99,19 +104,10 @@ class HealthResponse(BaseModel):
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
-@app.get("/", tags=["Info"])
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def root():
-    return {
-        "message": "Personality Prediction API — Decryptogen Technical Assessment",
-        "model": meta["model_name"],
-        "accuracy": f"{meta['accuracy']*100:.2f}%",
-        "roc_auc": meta["roc_auc"],
-        "endpoints": {
-            "predict": "POST /predict",
-            "health":  "GET  /health",
-            "docs":    "GET  /docs",
-        },
-    }
+    """Serve the prediction UI."""
+    return HTMLResponse(content=UI_HTML)
 
 
 @app.get("/health", response_model=HealthResponse, tags=["Health"])
@@ -140,10 +136,9 @@ async def predict(request: PredictionRequest):
             "Post_frequency":             request.Post_frequency,
         }])
 
-        proba   = pipeline.predict_proba(input_data)[0]
+        proba    = pipeline.predict_proba(input_data)[0]
         pred_idx = int(np.argmax(proba))
 
-        # target_map: {"0": "Extrovert", "1": "Introvert"}
         label_map = meta["target_map"]
         predicted = label_map[str(pred_idx)]
         confidence = float(proba[pred_idx])

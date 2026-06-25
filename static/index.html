@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Personality Predictor — Decryptogen</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    .wrap { width: 100%; max-width: 520px; }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 1.5rem;
+    }
+    .header h1 { font-size: 1.65rem; font-weight: 800; letter-spacing: -0.5px; }
+    .header p  { font-size: 0.82rem; opacity: 0.8; margin-top: 0.3rem; }
+
+    /* ── Card ── */
+    .card {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+      padding: 2rem 2rem 1.75rem;
+    }
+
+    /* ── Section label ── */
+    .section-lbl {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      color: #aaa;
+      margin: 1.6rem 0 0.9rem;
+    }
+    .section-lbl:first-child { margin-top: 0; }
+
+    /* ── Slider field ── */
+    .field { margin-bottom: 1.15rem; }
+    .field-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 0.45rem;
+    }
+    .field-top label { font-size: 0.875rem; font-weight: 500; color: #374151; }
+    .field-val       { font-size: 0.875rem; font-weight: 700; color: #6C63FF; }
+
+    input[type="range"] {
+      width: 100%;
+      height: 5px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #E5E7EB;
+      border-radius: 99px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: #6C63FF;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.45);
+      transition: transform .12s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      background: #6C63FF;
+      border-radius: 50%;
+      border: none;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.45);
+    }
+
+    /* ── Divider ── */
+    .divider { height: 1px; background: #F3F4F6; margin: 1.4rem 0 0; }
+
+    /* ── Pill toggle (Yes / No) ── */
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.9rem;
+    }
+    .toggle-lbl { font-size: 0.875rem; font-weight: 500; color: #374151; }
+
+    .pill {
+      display: flex;
+      background: #F3F4F6;
+      border-radius: 99px;
+      padding: 3px;
+    }
+    .pill input[type="radio"] { display: none; }
+    .pill label {
+      padding: 0.28rem 1rem;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6B7280;
+      cursor: pointer;
+      transition: background .18s, color .18s, box-shadow .18s;
+      user-select: none;
+    }
+    .pill input[type="radio"]:checked + label {
+      background: #6C63FF;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(108,99,255,0.38);
+    }
+
+    /* ── Submit button ── */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.9rem;
+      margin-top: 1.6rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.2px;
+      transition: opacity .2s, transform .1s;
+    }
+    .btn:hover   { opacity: 0.9; }
+    .btn:active  { transform: scale(0.99); }
+    .btn:disabled{ opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 17px; height: 17px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error box ── */
+    .error-box {
+      display: none;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #DC2626;
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    /* ── Result ── */
+    .result {
+      display: none;
+      margin-top: 1.5rem;
+      border-radius: 16px;
+      padding: 1.6rem;
+      text-align: center;
+      animation: rise .35s ease;
+    }
+    .result.introvert { background: linear-gradient(135deg,#EDE9FE,#DDD6FE); border: 2px solid #C4B5FD; }
+    .result.extrovert { background: linear-gradient(135deg,#FEF3C7,#FDE68A); border: 2px solid #FCD34D; }
+
+    .result-emoji { font-size: 2.6rem; margin-bottom: 0.3rem; line-height: 1; }
+    .result-type  {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.2rem;
+    }
+    .result.introvert .result-type { color: #5B21B6; }
+    .result.extrovert .result-type { color: #92400E; }
+
+    .result-conf {
+      font-size: 0.85rem;
+      font-weight: 500;
+      opacity: 0.65;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Probability bars */
+    .bars { display: flex; flex-direction: column; gap: 0.55rem; text-align: left; }
+    .bar-row { display: flex; align-items: center; gap: 0.7rem; font-size: 0.8rem; }
+    .bar-name { width: 74px; text-align: right; font-weight: 600; color: #374151; }
+    .bar-track {
+      flex: 1;
+      background: rgba(255,255,255,0.55);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .bar-fill { height: 100%; border-radius: 99px; transition: width .65s ease; }
+    .fill-ext { background: #F59E0B; }
+    .fill-int { background: #7C3AED; }
+    .bar-pct { width: 40px; font-weight: 700; color: #374151; }
+
+    /* Footer note */
+    .model-note {
+      text-align: center;
+      font-size: 0.72rem;
+      color: #bbb;
+      margin-top: 1.4rem;
+    }
+
+    @keyframes rise {
+      from { opacity:0; transform:translateY(10px); }
+      to   { opacity:1; transform:translateY(0);    }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🧠 Personality Predictor</h1>
+    <p>Decryptogen Technical Assessment &nbsp;·&nbsp; XGBoost · 91.45% Accuracy</p>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Numeric sliders -->
+    <div class="section-lbl">Behavioural Signals</div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="s-alone">Time Spent Alone</label>
+        <span class="field-val" id="v-alone">5.5 h / day</span>
+      </div>
+      <input type="range" id="s-alone" min="0" max="11" step="0.5" value="5.5"
+             oninput="document.getElementById('v-alone').textContent=this.value+' h / day'">
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="s-social">Social Event Attendance</label>
+        <span class="field-val" id="v-social">5 / month</span>
+      </div>
+      <input type="range" id="s-social" min="0" max="10" step="1" value="5"
+             oninput="document.getElementById('v-social').textContent=this.value+' / month'">
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="s-outside">Going Outside</label>
+        <span class="field-val" id="v-outside">3 × / week</span>
+      </div>
+      <input type="range" id="s-outside" min="0" max="7" step="1" value="3"
+             oninput="document.getElementById('v-outside').textContent=this.value+' × / week'">
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="s-friends">Friends Circle Size</label>
+        <span class="field-val" id="v-friends">10 friends</span>
+      </div>
+      <input type="range" id="s-friends" min="0" max="20" step="1" value="10"
+             oninput="document.getElementById('v-friends').textContent=this.value+' friends'">
+    </div>
+
+    <div class="field">
+      <div class="field-top">
+        <label for="s-posts">Post Frequency</label>
+        <span class="field-val" id="v-posts">5 / week</span>
+      </div>
+      <input type="range" id="s-posts" min="0" max="10" step="1" value="5"
+             oninput="document.getElementById('v-posts').textContent=this.value+' / week'">
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Yes / No toggles -->
+    <div class="section-lbl">Personal Traits</div>
+
+    <div class="toggle-row">
+      <span class="toggle-lbl">Do you have stage fear?</span>
+      <div class="pill">
+        <input type="radio" name="stage" id="st-no" value="No" checked>
+        <label for="st-no">No</label>
+        <input type="radio" name="stage" id="st-yes" value="Yes">
+        <label for="st-yes">Yes</label>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <span class="toggle-lbl">Feel drained after socialising?</span>
+      <div class="pill">
+        <input type="radio" name="drained" id="dr-no" value="No" checked>
+        <label for="dr-no">No</label>
+        <input type="radio" name="drained" id="dr-yes" value="Yes">
+        <label for="dr-yes">Yes</label>
+      </div>
+    </div>
+
+    <!-- Button -->
+    <button class="btn" onclick="predict()" id="btn">
+      <div class="spinner" id="spinner"></div>
+      <span id="btn-text">Predict Personality</span>
+    </button>
+
+    <!-- Error -->
+    <div class="error-box" id="error-box"></div>
+
+    <!-- Result -->
+    <div class="result" id="result">
+      <div class="result-emoji" id="r-emoji">🔮</div>
+      <div class="result-type"  id="r-type">Introvert</div>
+      <div class="result-conf"  id="r-conf">86.8% confidence</div>
+      <div class="bars">
+        <div class="bar-row">
+          <span class="bar-name">Extrovert</span>
+          <div class="bar-track"><div class="bar-fill fill-ext" id="b-ext" style="width:0%"></div></div>
+          <span class="bar-pct" id="p-ext">—</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">Introvert</span>
+          <div class="bar-track"><div class="bar-fill fill-int" id="b-int" style="width:0%"></div></div>
+          <span class="bar-pct" id="p-int">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="model-note">XGBoost (Tuned) · ROC-AUC 0.9547 · 10-fold CV</div>
+  </div>
+</div>
+
+<script>
+  async function predict() {
+    const btn      = document.getElementById('btn');
+    const btnText  = document.getElementById('btn-text');
+    const spinner  = document.getElementById('spinner');
+    const errorBox = document.getElementById('error-box');
+    const result   = document.getElementById('result');
+
+    // Loading state
+    btn.disabled         = true;
+    spinner.style.display = 'block';
+    btnText.textContent  = 'Predicting…';
+    errorBox.style.display = 'none';
+    result.style.display   = 'none';
+
+    const payload = {
+      Time_spent_Alone:          parseFloat(document.getElementById('s-alone').value),
+      Stage_fear:                document.querySelector('input[name="stage"]:checked').value,
+      Social_event_attendance:   parseFloat(document.getElementById('s-social').value),
+      Going_outside:             parseFloat(document.getElementById('s-outside').value),
+      Drained_after_socializing: document.querySelector('input[name="drained"]:checked').value,
+      Friends_circle_size:       parseFloat(document.getElementById('s-friends').value),
+      Post_frequency:            parseFloat(document.getElementById('s-posts').value),
+    };
+
+    try {
+      const res  = await fetch('/predict', {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      showResult(await res.json());
+    } catch (e) {
+      errorBox.textContent   = 'Could not reach the prediction service. Please try again.';
+      errorBox.style.display = 'block';
+    } finally {
+      btn.disabled          = false;
+      spinner.style.display = 'none';
+      btnText.textContent   = 'Predict Personality';
+    }
+  }
+
+  function showResult(data) {
+    const isIntro = data.personality === 'Introvert';
+    const conf    = (data.confidence * 100).toFixed(1);
+    const extPct  = (data.probabilities.Extrovert * 100).toFixed(1);
+    const intPct  = (data.probabilities.Introvert * 100).toFixed(1);
+
+    const el = document.getElementById('result');
+    el.className = 'result ' + (isIntro ? 'introvert' : 'extrovert');
+
+    document.getElementById('r-emoji').textContent = isIntro ? '🔮' : '⚡';
+    document.getElementById('r-type').textContent  = data.personality;
+    document.getElementById('r-conf').textContent  = conf + '% confidence';
+
+    document.getElementById('b-ext').style.width = extPct + '%';
+    document.getElementById('b-int').style.width = intPct + '%';
+    document.getElementById('p-ext').textContent = extPct + '%';
+    document.getElementById('p-int').textContent = intPct + '%';
+
+    el.style.display = 'block';
+  }
+</script>
+</body>
+</html>
